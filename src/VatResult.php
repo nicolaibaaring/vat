@@ -32,7 +32,7 @@ final class VatResult
         string $vatNumber,
         string $name,
         string $address,
-        DateTime $requestedAt,
+        DateTime $requestedAt
     ) {
         $this->isValid = $isValid;
         $this->countryCode = $countryCode;
