@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ibericode\Vat\Vies;
 
+use Ibericode\Vat\VatResult;
 use SoapClient;
 use SoapFault;
 
@@ -44,6 +45,28 @@ class Client
      */
     public function checkVat(string $countryCode, string $vatNumber) : bool
     {
+        $response = $this->performCheckVatRequest($countryCode, $vatNumber);
+
+        return (bool) $response->valid;
+    }
+
+    /**
+     * @param string $countryCode
+     * @param string $vatNumber
+     *
+     * @return VatResult
+     *
+     * @throws ViesException
+     */
+    public function fetchValidation(string $countryCode, string $vatNumber) : VatResult
+    {
+        $response = $this->performCheckVatRequest($countryCode, $vatNumber);
+
+        return VatResult::fromVies($response);
+    }
+
+    protected function performCheckVatRequest(string $countryCode, string $vatNumber): object
+    {
         try {
             $response = $this->getClient()->checkVat(
                 array(
@@ -55,7 +78,7 @@ class Client
             throw new ViesException($e->getMessage(), $e->getCode());
         }
 
-        return (bool) $response->valid;
+        return $response;
     }
 
     /**

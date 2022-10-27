@@ -98,9 +98,7 @@ class Validator
             return false;
         }
 
-        $vatNumber = strtoupper($vatNumber);
-        $country = substr($vatNumber, 0, 2);
-        $number = substr($vatNumber, 2);
+        [$country, $number] = $this->splitVatNumber($vatNumber);
 
         if (! isset($this->patterns[$country])) {
             return false;
@@ -110,7 +108,6 @@ class Validator
     }
 
     /**
-     *
      * @param string $vatNumber
      *
      * @return boolean
@@ -119,9 +116,8 @@ class Validator
      */
     protected function validateVatNumberExistence(string $vatNumber) : bool
     {
-        $vatNumber = strtoupper($vatNumber);
-        $country = substr($vatNumber, 0, 2);
-        $number = substr($vatNumber, 2);
+        [$country, $number] = $this->splitVatNumber($vatNumber);
+
         return $this->client->checkVat($country, $number);
     }
 
@@ -137,5 +133,35 @@ class Validator
     public function validateVatNumber(string $vatNumber) : bool
     {
         return $this->validateVatNumberFormat($vatNumber) && $this->validateVatNumberExistence($vatNumber);
+    }
+
+    /**
+     * Validates a VAT number and returns the validated result
+     *
+     * @param string $vatNumber
+     * @return VatResult
+     */
+    public function fetchVatNumberValidation(string $vatNumber): VatResult
+    {
+        [$country, $number] = $this->splitVatNumber($vatNumber);
+
+        return $this->client->fetchValidation($country, $number);
+    }
+
+    /**
+     * Splits a VAT number into country code and number parts.
+     *
+     * @param string $vatNumber
+     * @return array{0: string, 1: string}
+     *
+     * @throws Vies\ViesException
+     */
+    private function splitVatNumber(string $vatNumber): array
+    {
+        $vatNumber = strtoupper($vatNumber);
+        $country = substr($vatNumber, 0, 2);
+        $number = substr($vatNumber, 2);
+
+        return [$country, $number];
     }
 }
