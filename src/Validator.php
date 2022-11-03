@@ -149,6 +149,21 @@ class Validator
     }
 
     /**
+     * Validates a VAT number and returns the validated result with request verification
+     *
+     * @param string $vatNumber
+     * @param string $requesterVatNumber
+     * @return VatResult
+     */
+    public function fetchVatNumberApproxValidation(string $vatNumber, string $requesterVatNumber): VatResult
+    {
+        [$country, $number] = $this->splitVatNumber($vatNumber);
+        [$requesterCountry, $requesterNumber] = $this->splitVatNumber($requesterVatNumber);
+
+        return $this->client->fetchApproxValidation($country, $number, $requesterCountry, $requesterNumber);
+    }
+
+    /**
      * Splits a VAT number into country code and number parts.
      *
      * @param string $vatNumber

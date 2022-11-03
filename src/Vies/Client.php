@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace Ibericode\Vat\Vies;
 
-use Ibericode\Vat\VatResult;
 use SoapClient;
 use SoapFault;
+
+use Ibericode\Vat\VatResult;
 
 class Client
 {
@@ -65,6 +66,26 @@ class Client
         return VatResult::fromVies($response);
     }
 
+    /**
+     * @param string $countryCode
+     * @param string $vatNumber
+     * @param string $requesterCountryCode
+     * @param string $requesterVatNumber
+     *
+     * @return VatResult
+     *
+     * @throws ViesException
+     */
+    public function fetchApproxValidation(string $countryCode, string $vatNumber, string $requesterCountryCode, string $requesterVatNumber) : VatResult
+    {
+        $response = $this->performCheckVatApproxRequest($countryCode, $vatNumber, [
+            'requesterCountryCode' => $requesterCountryCode,
+            'requesterVatNumber' => $requesterVatNumber,
+        ]);
+
+        return VatResult::fromViesApprox($response);
+    }
+
     protected function performCheckVatRequest(string $countryCode, string $vatNumber): object
     {
         try {
@@ -73,6 +94,22 @@ class Client
                     'countryCode' => $countryCode,
                     'vatNumber' => $vatNumber
                 )
+            );
+        } catch (SoapFault $e) {
+            throw new ViesException($e->getMessage(), $e->getCode());
+        }
+
+        return $response;
+    }
+
+    protected function performCheckVatApproxRequest(string $countryCode, string $vatNumber, array $arguments): object
+    {
+        try {
+            $response = $this->getClient()->checkVatApprox(
+                array(
+                    'countryCode' => $countryCode,
+                    'vatNumber' => $vatNumber
+                ) + $arguments
             );
         } catch (SoapFault $e) {
             throw new ViesException($e->getMessage(), $e->getCode());
