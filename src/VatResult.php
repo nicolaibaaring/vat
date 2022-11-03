@@ -33,8 +33,8 @@ final class VatResult
             $result->valid,
             $result->countryCode,
             $result->vatNumber,
-            $result->traderName,
-            str_replace('"', '', $result->traderAddress),
+            $result->traderName ?? '',
+            str_replace('"', '', $result->traderAddress ?? ''),
             DateTime::createFromFormat('!Y-m-dP', $result->requestDate),
             $result->requestIdentifier
         );
